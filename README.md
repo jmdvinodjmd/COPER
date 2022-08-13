@@ -1,7 +1,7 @@
 # COPER: Continuous Patient State Perceiver
 
 Code for the paper:
-> Vinod Kumar Chauhan, Anshul Thakur, Odhran O'Donoghue and David A. Clifton (2022) COPER: Continuous Patient State Perceiver, IEEE International Conference on Biomedical and Health Informatics (BHI-2022)
+> [[Vinod Kumar Chauhan, Anshul Thakur, Odhran O'Donoghue and David A. Clifton (2022) COPER: Continuous Patient State Perceiver, IEEE International Conference on Biomedical and Health Informatics (BHI-2022)]](https://arxiv.org/abs/2208.03196)
 
 ## Prerequisites
 
@@ -72,7 +72,13 @@ python run_exp.py --model-type 'COPER' --cont-in --cont-out --self-per-cross-att
 
 ## Citation:
 ```
-  coming...
+@inproceedings{chauhan2022coper,
+  title={COPER: Continuous Patient State Perceiver},
+  author={Chauhan, Vinod Kumar and Thakur, Anshul and O'Donoghue, Odhran and Clifton, David A},
+  booktitle={IEEE International Conference on Biomedical and Health Informatics},
+  year={2022},
+  url={https://arxiv.org/abs/2208.03196}
+}
 ```
 
 Neural ODE implementations inspired from [[Yulia Rubanova]](https://github.com/YuliaRubanova/latent_ode).
