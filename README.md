@@ -1,7 +1,7 @@
 # COPER: Continuous Patient State Perceiver
 
 Code for the paper:
-> [[Vinod Kumar Chauhan, Anshul Thakur, Odhran O'Donoghue and David A. Clifton (2022) COPER: Continuous Patient State Perceiver, IEEE International Conference on Biomedical and Health Informatics (BHI-2022)]](https://arxiv.org/abs/2208.03196)
+> [Vinod Kumar Chauhan, Anshul Thakur, Odhran O'Donoghue and David A. Clifton (2022) COPER: Continuous Patient State Perceiver, IEEE International Conference on Biomedical and Health Informatics (BHI-2022)](https://arxiv.org/abs/2208.03196)
 
 ## Prerequisites
 
