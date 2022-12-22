@@ -1,6 +1,8 @@
-# COPER: Continuous Patient State Perceiver
+# Continuous Patient State Attention Models
 
-Code for the paper:
+Code for the papers:
+> [Vinod Kumar Chauhan, Anshul Thakur, Odhran O'Donoghue, Omid Rohanian and David A. Clifton (2023) Continuous Patient State Attention Models, (under review)](https://arxiv.org/abs/2208.03196)
+
 > [Vinod Kumar Chauhan, Anshul Thakur, Odhran O'Donoghue and David A. Clifton (2022) COPER: Continuous Patient State Perceiver, IEEE International Conference on Biomedical and Health Informatics (BHI-2022)](https://arxiv.org/abs/2208.03196)
 
 ## Prerequisites
@@ -9,69 +11,22 @@ Install `torchdiffeq` from https://github.com/rtqichen/torchdiffeq.
 
 ## Experiment
 
-You need mimic-iii dataset. You can use [[Harutyunyan et al (2019)]](https://github.com/YerevaNN/mimic3-benchmarks)
+You need mimic-iii [mimic-iii](https://github.com/YerevaNN/mimic3-benchmarks) and [Physionet Challenge 2012](https://physionet.org/content/challenge-2012/1.0.0/) datasets.
 
-To execute experiments, you can the shell script: ```run_script.sh```, which are also listed below.
+To run different experiments, you can use the following shell scripts:
+* ```run_irregular_mimic.sh```: to study irregularity on mimic dataset.
+* ```run_irregular_physionet.sh```: to study irregularity on physionet dataset.
+* ```run_exp_normal.sh```: to run Perceiver and baselines (without irregularity).
+* ```run_perceiver_latents.sh```: to study the effect of number of latents on the Perceiver and compare with Transformer.
 
-* LSTM
+## Citations:
 ```
-python run_exp.py --model-type 'LSTM' --latent-dim 50 --num-layers 2 --lstm-dropout 0.5  --dataset 'mimic' --random-seed 1
-python run_exp.py --model-type 'LSTM' --latent-dim 50 --num-layers 2 --lstm-dropout 0.5  --dataset 'mimic' --random-seed 1 --drop 0.25
-python run_exp.py --model-type 'LSTM' --latent-dim 50 --num-layers 2 --lstm-dropout 0.5  --dataset 'mimic' --random-seed 1 --drop 0.50
-python run_exp.py --model-type 'LSTM' --latent-dim 50 --num-layers 2 --lstm-dropout 0.5  --dataset 'mimic' --random-seed 1 --drop 0.75
+@inproceedings{chauhan2022coper,
+  title={Continuous Patient State Attention Models},
+  author={Chauhan, Vinod Kumar and Thakur, Anshul and O'Donoghue, Odhran and Rohanian, Omid and Clifton, David A},
+  year={2023},
+}
 
-python run_exp.py --model-type 'LSTM' --latent-dim 50 --num-layers 2 --lstm-dropout 0.5  --dataset 'mimic' --random-seed 2
-python run_exp.py --model-type 'LSTM' --latent-dim 50 --num-layers 2 --lstm-dropout 0.5  --dataset 'mimic' --random-seed 2 --drop 0.25
-python run_exp.py --model-type 'LSTM' --latent-dim 50 --num-layers 2 --lstm-dropout 0.5  --dataset 'mimic' --random-seed 2 --drop 0.50
-python run_exp.py --model-type 'LSTM' --latent-dim 50 --num-layers 2 --lstm-dropout 0.5  --dataset 'mimic' --random-seed 2 --drop 0.75
-
-python run_exp.py --model-type 'LSTM' --latent-dim 50 --num-layers 2 --lstm-dropout 0.5  --dataset 'mimic' --random-seed 3
-python run_exp.py --model-type 'LSTM' --latent-dim 50 --num-layers 2 --lstm-dropout 0.5  --dataset 'mimic' --random-seed 3 --drop 0.25
-python run_exp.py --model-type 'LSTM' --latent-dim 50 --num-layers 2 --lstm-dropout 0.5  --dataset 'mimic' --random-seed 3 --drop 0.50
-python run_exp.py --model-type 'LSTM' --latent-dim 50 --num-layers 2 --lstm-dropout 0.5  --dataset 'mimic' --random-seed 3 --drop 0.75
-
-```
-
-* Perceiver
-
-```
-python run_exp.py --model-type 'PERCEIVER' --self-per-cross-attn 1 --latent-heads 2 --cross-heads 1 --cross-dim-head 128 --latent-dim-head 128 --latent-dim 64 --units 128 --ode-dropout 0.5 --att-dropout 0.5 --ff-dropout 0.5 --dataset 'mimic' --random-seed 1
-python run_exp.py --model-type 'PERCEIVER' --self-per-cross-attn 1 --latent-heads 2 --cross-heads 1 --cross-dim-head 128 --latent-dim-head 128 --latent-dim 64 --units 128 --ode-dropout 0.5 --att-dropout 0.5 --ff-dropout 0.5 --dataset 'mimic' --random-seed 1 --drop 0.25
-python run_exp.py --model-type 'PERCEIVER' --self-per-cross-attn 1 --latent-heads 2 --cross-heads 1 --cross-dim-head 128 --latent-dim-head 128 --latent-dim 64 --units 128 --ode-dropout 0.5 --att-dropout 0.5 --ff-dropout 0.5 --dataset 'mimic' --random-seed 1 --drop 0.50
-python run_exp.py --model-type 'PERCEIVER' --self-per-cross-attn 1 --latent-heads 2 --cross-heads 1 --cross-dim-head 128 --latent-dim-head 128 --latent-dim 64 --units 128 --ode-dropout 0.5 --att-dropout 0.5 --ff-dropout 0.5 --dataset 'mimic' --random-seed 1 --drop 0.75
-
-python run_exp.py --model-type 'PERCEIVER' --self-per-cross-attn 1 --latent-heads 2 --cross-heads 1 --cross-dim-head 128 --latent-dim-head 128 --latent-dim 64 --units 128 --ode-dropout 0.5 --att-dropout 0.5 --ff-dropout 0.5 --dataset 'mimic' --random-seed 2
-python run_exp.py --model-type 'PERCEIVER' --self-per-cross-attn 1 --latent-heads 2 --cross-heads 1 --cross-dim-head 128 --latent-dim-head 128 --latent-dim 64 --units 128 --ode-dropout 0.5 --att-dropout 0.5 --ff-dropout 0.5 --dataset 'mimic' --random-seed 2 --drop 0.25
-python run_exp.py --model-type 'PERCEIVER' --self-per-cross-attn 1 --latent-heads 2 --cross-heads 1 --cross-dim-head 128 --latent-dim-head 128 --latent-dim 64 --units 128 --ode-dropout 0.5 --att-dropout 0.5 --ff-dropout 0.5 --dataset 'mimic' --random-seed 2 --drop 0.50
-python run_exp.py --model-type 'PERCEIVER' --self-per-cross-attn 1 --latent-heads 2 --cross-heads 1 --cross-dim-head 128 --latent-dim-head 128 --latent-dim 64 --units 128 --ode-dropout 0.5 --att-dropout 0.5 --ff-dropout 0.5 --dataset 'mimic' --random-seed 2 --drop 0.75
-
-python run_exp.py --model-type 'PERCEIVER' --self-per-cross-attn 1 --latent-heads 2 --cross-heads 1 --cross-dim-head 128 --latent-dim-head 128 --latent-dim 64 --units 128 --ode-dropout 0.5 --att-dropout 0.5 --ff-dropout 0.5 --dataset 'mimic' --random-seed 3
-python run_exp.py --model-type 'PERCEIVER' --self-per-cross-attn 1 --latent-heads 2 --cross-heads 1 --cross-dim-head 128 --latent-dim-head 128 --latent-dim 64 --units 128 --ode-dropout 0.5 --att-dropout 0.5 --ff-dropout 0.5 --dataset 'mimic' --random-seed 3 --drop 0.25
-python run_exp.py --model-type 'PERCEIVER' --self-per-cross-attn 1 --latent-heads 2 --cross-heads 1 --cross-dim-head 128 --latent-dim-head 128 --latent-dim 64 --units 128 --ode-dropout 0.5 --att-dropout 0.5 --ff-dropout 0.5 --dataset 'mimic' --random-seed 3 --drop 0.50
-python run_exp.py --model-type 'PERCEIVER' --self-per-cross-attn 1 --latent-heads 2 --cross-heads 1 --cross-dim-head 128 --latent-dim-head 128 --latent-dim 64 --units 128 --ode-dropout 0.5 --att-dropout 0.5 --ff-dropout 0.5 --dataset 'mimic' --random-seed 3 --drop 0.75
-
-```
-
-* COPER
-```
-python run_exp.py --model-type 'COPER' --cont-in --cont-out --self-per-cross-attn 1 --latent-heads 2 --cross-heads 1 --cross-dim-head 128 --latent-dim-head 128 --latent-dim 64 --units 128 --ode-dropout 0.5 --att-dropout 0.5 --ff-dropout 0.5 --dataset 'mimic' --random-seed 1
-python run_exp.py --model-type 'COPER' --cont-in --cont-out --self-per-cross-attn 1 --latent-heads 2 --cross-heads 1 --cross-dim-head 128 --latent-dim-head 128 --latent-dim 64 --units 128 --ode-dropout 0.5 --att-dropout 0.5 --ff-dropout 0.5 --dataset 'mimic' --random-seed 1 --drop 0.25
-python run_exp.py --model-type 'COPER' --cont-in --cont-out --self-per-cross-attn 1 --latent-heads 2 --cross-heads 1 --cross-dim-head 128 --latent-dim-head 128 --latent-dim 64 --units 128 --ode-dropout 0.5 --att-dropout 0.5 --ff-dropout 0.5 --dataset 'mimic' --random-seed 1 --drop 0.50
-python run_exp.py --model-type 'COPER' --cont-in --cont-out --self-per-cross-attn 1 --latent-heads 2 --cross-heads 1 --cross-dim-head 128 --latent-dim-head 128 --latent-dim 64 --units 128 --ode-dropout 0.5 --att-dropout 0.5 --ff-dropout 0.5 --dataset 'mimic' --random-seed 1 --drop 0.75
-
-python run_exp.py --model-type 'COPER' --cont-in --cont-out --self-per-cross-attn 1 --latent-heads 2 --cross-heads 1 --cross-dim-head 128 --latent-dim-head 128 --latent-dim 64 --units 128 --ode-dropout 0.5 --att-dropout 0.5 --ff-dropout 0.5 --dataset 'mimic' --random-seed 2
-python run_exp.py --model-type 'COPER' --cont-in --cont-out --self-per-cross-attn 1 --latent-heads 2 --cross-heads 1 --cross-dim-head 128 --latent-dim-head 128 --latent-dim 64 --units 128 --ode-dropout 0.5 --att-dropout 0.5 --ff-dropout 0.5 --dataset 'mimic' --random-seed 2 --drop 0.25
-python run_exp.py --model-type 'COPER' --cont-in --cont-out --self-per-cross-attn 1 --latent-heads 2 --cross-heads 1 --cross-dim-head 128 --latent-dim-head 128 --latent-dim 64 --units 128 --ode-dropout 0.5 --att-dropout 0.5 --ff-dropout 0.5 --dataset 'mimic' --random-seed 2 --drop 0.50
-python run_exp.py --model-type 'COPER' --cont-in --cont-out --self-per-cross-attn 1 --latent-heads 2 --cross-heads 1 --cross-dim-head 128 --latent-dim-head 128 --latent-dim 64 --units 128 --ode-dropout 0.5 --att-dropout 0.5 --ff-dropout 0.5 --dataset 'mimic' --random-seed 2 --drop 0.75
-
-python run_exp.py --model-type 'COPER' --cont-in --cont-out --self-per-cross-attn 1 --latent-heads 2 --cross-heads 1 --cross-dim-head 128 --latent-dim-head 128 --latent-dim 64 --units 128 --ode-dropout 0.5 --att-dropout 0.5 --ff-dropout 0.5 --dataset 'mimic' --random-seed 3
-python run_exp.py --model-type 'COPER' --cont-in --cont-out --self-per-cross-attn 1 --latent-heads 2 --cross-heads 1 --cross-dim-head 128 --latent-dim-head 128 --latent-dim 64 --units 128 --ode-dropout 0.5 --att-dropout 0.5 --ff-dropout 0.5 --dataset 'mimic' --random-seed 3 --drop 0.25
-python run_exp.py --model-type 'COPER' --cont-in --cont-out --self-per-cross-attn 1 --latent-heads 2 --cross-heads 1 --cross-dim-head 128 --latent-dim-head 128 --latent-dim 64 --units 128 --ode-dropout 0.5 --att-dropout 0.5 --ff-dropout 0.5 --dataset 'mimic' --random-seed 3 --drop 0.50
-python run_exp.py --model-type 'COPER' --cont-in --cont-out --self-per-cross-attn 1 --latent-heads 2 --cross-heads 1 --cross-dim-head 128 --latent-dim-head 128 --latent-dim 64 --units 128 --ode-dropout 0.5 --att-dropout 0.5 --ff-dropout 0.5 --dataset 'mimic' --random-seed 3 --drop 0.75
-```
-
-## Citation:
-```
 @inproceedings{chauhan2022coper,
   title={COPER: Continuous Patient State Perceiver},
   author={Chauhan, Vinod Kumar and Thakur, Anshul and O'Donoghue, Odhran and Clifton, David A},
@@ -81,4 +36,4 @@ python run_exp.py --model-type 'COPER' --cont-in --cont-out --self-per-cross-att
 }
 ```
 
-Neural ODE implementations inspired from [[Yulia Rubanova]](https://github.com/YuliaRubanova/latent_ode).
+Neural ODE implementations based on [[Yulia Rubanova]](https://github.com/YuliaRubanova/latent_ode).

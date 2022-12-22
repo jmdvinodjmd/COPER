@@ -1,3 +1,5 @@
 {
-  "mimic3_mortality": "/data/Vinod/Data/datasets/mimic-iii-clinical-database-1.4/4_ready_for_model/mortality.data"
+  "mimic3_mortality": "/data/Vinod/Data/datasets/mimic-iii-clinical-database-1.4/4_ready_for_model/mortality.data",
+  "physionet_2012_data": "/data/Vinod/Data/datasets/physionet2012/anshul_from/Data.npy",
+  "physionet_2012_labels": "/data/Vinod/Data/datasets/physionet2012/anshul_from/labels.npy"
 }

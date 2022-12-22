@@ -2,32 +2,23 @@ import argparse
 from asyncio.log import logger
 import os
 import logging
-import pickle
-from einops import rearrange, repeat
 import torch
-import torch.nn as nn
 import numpy as np
-import pandas as pd
-import math
-import glob
-import re
-from shutil import copyfile
-import sklearn as sk
-import subprocess
-import datetime
-import random
 
 import src.metrics as metrics
+
 
 
 def init_args():
     parser = argparse.ArgumentParser('ODE')
 
-    parser.add_argument('--model-type', type=str, default='COPER', help="model to run: COPER, LSTM, mTAND, LODE...")
+    parser.add_argument('--UQ', type=int, default=2)
+    parser.add_argument('--model-type', type=str, default='TCN', help="model to run: COPER, LSTM, mTAND, LODE, TCN...")
+    parser.add_argument('--setting', type=str, default='Train', help="need to set to Test while testing the ODE to retain observed points.")
     parser.add_argument('--drop',  type=float, default=None, help="percentage of points to remove.")
-    parser.add_argument('--niters', type=int, default=100)
+    parser.add_argument('--niters', type=int, default=120)
     parser.add_argument('--num-labels', type=int, default=1)
-    parser.add_argument('--fold', type=int, default=1)
+    parser.add_argument('--fold', type=int, default=-1)
     parser.add_argument('--kfold', type=int, default=5)
     parser.add_argument('--patience', type=int, default=10)
     parser.add_argument('--lr',  type=float, default=1e-04, help="Starting learning rate.")
@@ -36,7 +27,8 @@ def init_args():
     parser.add_argument('--load', type=str, default=None, help="ID of the experiment to load for evaluation. If None, run a new experiment.")
     parser.add_argument('-r', '--random-seed', type=int, default=2022, help="Random_seed")
     parser.add_argument('--dataset', type=str, default='physionet', help="Dataset to load. Available: physionet, activity, hopper, periodic")
-    parser.add_argument('--num-latents', type=int, default=50, help="number of latents")
+    parser.add_argument('--project', type=str, default='perceiver', help="name of the project for wandb")
+    parser.add_argument('--num-latents', type=int, default=48, help="number of latents")
     parser.add_argument('--rec-dims', type=int, default=40, help="Dimensionality of the recognition model (ODE or RNN).")
     parser.add_argument('--rec-layers', type=int, default=3, help="Number of layers in ODE func")
     parser.add_argument('--units', '-u', type=int, default=100, help="Number of units per layer in ODE func")
@@ -79,7 +71,8 @@ def init_args():
     args = parser.parse_args()
 
     return args
-    
+
+
 def makedirs(dirname):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
@@ -118,11 +111,96 @@ def get_logger(logpath, filepath, package_files=[],
 
     return logger
 
+
 def get_device(tensor):
     device = torch.device("cpu")
     if tensor.is_cuda:
         device = tensor.get_device()
     return device
+
+
+def evaluate(args, device, setting, test_loader, model, crit, logger, wandb, epoch, n_traj_samples=None):
+    
+    test_loss = 0
+    predictions = torch.Tensor([]).to(device)
+    labels = torch.Tensor([]).to(device)
+    # with torch.no_grad():
+    for data_dict in test_loader:
+        X, y = data_dict["X"], data_dict["y"]
+        if args.drop is None:
+            objd_t, pred_t, time_steps = data_dict["tp"], data_dict["tp"], data_dict["tp"]
+            mask = None
+        elif args.mask is False:
+            objd_t, pred_t, time_steps = data_dict["objd_t"], data_dict["pred_t"], data_dict["tp"]
+            mask = None
+        else:
+            objd_t, pred_t, time_steps, mask = data_dict["objd_t"], data_dict["pred_t"], data_dict["tp"], data_dict["mask"]
+
+        # forward pass
+        output = model(X, time_steps, objd_t, pred_t)
+        output = output.squeeze()
+        predictions = torch.cat((predictions, output))
+        labels = torch.cat((labels, y))
+        test_loss +=crit(output, y).item()
+
+    test_loss = test_loss / len(test_loader)
+    # calculate metrics
+    wandb.log({setting+" loss":test_loss})
+    logger.info('{} Epoch: {:04d} | {} Loss {:.6f}'.format(setting, epoch, setting, test_loss))
+    results = metrics.print_metrics_binary_classification(labels.data.cpu().numpy(),
+                predictions.data.cpu().numpy(), setting, verbose=1, logger=logger, wandb=wandb)
+    logger.info('\n')
+
+    if 'Test' in setting:
+        np.savez('./results/Predictions_'+args.model_type + '-' + setting + '-'+ str(args.dataset) + '-'+ str(args.fold) + '-'+ str(args.random_seed) + '-'+ str(args.drop), predictions.data.cpu().numpy())
+        
+    return results[setting+' AUROC']
+
+def enable_dropout(m):
+    for each_module in m.modules():
+        if each_module.__class__.__name__.startswith('Dropout'):
+            each_module.train()
+
+def evaluate_uq(args, device, setting, test_loader, model, crit, logger, wandb, epoch, n_traj_samples=None):
+    for i in range(args.UQ):
+        test_loss = 0
+        predictions = torch.Tensor([]).to(device)
+        labels = torch.Tensor([]).to(device)
+        
+        enable_dropout(model)
+        # with torch.no_grad()
+        for data_dict in test_loader:
+            X, y = data_dict["X"], data_dict["y"]
+            if args.drop is None:
+                objd_t, pred_t, time_steps = data_dict["tp"], data_dict["tp"], data_dict["tp"]
+                mask = None
+            elif args.mask is False:
+                objd_t, pred_t, time_steps = data_dict["objd_t"], data_dict["pred_t"], data_dict["tp"]
+                mask = None
+            else:
+                objd_t, pred_t, time_steps, mask = data_dict["objd_t"], data_dict["pred_t"], data_dict["tp"], data_dict["mask"]
+            
+            # forward pass
+            output = model(X, time_steps, objd_t, pred_t)
+            output = output.squeeze()
+            # print('data size:', data.shape)
+            predictions = torch.cat((predictions, output))
+            labels = torch.cat((labels, y))
+            test_loss +=crit(output, y).item()
+
+        test_loss = test_loss / len(test_loader)
+        # calculate metrics
+        wandb.log({setting+" loss":test_loss})
+        logger.info('{} Epoch: {:04d} | {} Loss {:.6f}'.format(setting, epoch, setting, test_loss))
+        results = metrics.print_metrics_binary_classification(labels.data.cpu().numpy(),
+                    predictions.data.cpu().numpy(), setting, verbose=1, logger=logger, wandb=wandb)
+        
+        if 'Test' in setting:
+            np.savez('./results/Predictions_'+args.model_type+ '-UQ-'+ str(i)  + '-' + setting + '-'+ str(args.dataset) + '-'+ str(args.fold) + '-'+ str(args.random_seed) + '-'+ str(args.drop), preds=predictions.data.cpu().numpy(), labels=labels.data.cpu().numpy())
+
+        logger.info('\n')
+        
+    return results[setting+' AUROC']
 
 def linspace_vector(start, end, n_points):
     # start is either one value or a vector
@@ -141,78 +219,8 @@ def linspace_vector(start, end, n_points):
         res = torch.t(res.reshape(start.size(0), n_points))
     return res
 
-def reverse(tensor):
-    idx = [i for i in range(tensor.size(0)-1, -1, -1)]
-    return tensor[idx]
-
-
-def lr_scheduler(epoch, lr, warmup_epochs=15, decay_epochs=100, initial_lr=1e-6, base_lr=1e-3, min_lr=5e-5):
-    if epoch <= warmup_epochs:
-        pct = epoch / warmup_epochs
-        return ((base_lr - initial_lr) * pct) + initial_lr
-
-    if epoch > warmup_epochs and epoch < warmup_epochs+decay_epochs:
-        pct = 1 - ((epoch - warmup_epochs) / decay_epochs)
-        return ((base_lr - min_lr) * pct) + min_lr
-
-    return min_lr
-
-def check_param(model, p):
-    for name, param in model.named_parameters():
-        if name == p:
-            print (param.data)
-
-# takes in a module and applies the specified weight initialization
-def weights_init_uniform_rule(m):
-    classname = m.__class__.__name__
-    # for every Linear layer in a model..
-    if classname.find('Linear') != -1:
-        # get the number of the inputs
-        n = m.in_features
-        y = 1.0/np.sqrt(n)
-        m.weight.data.uniform_(-y, y)
-        m.bias.data.fill_(0)
-
-
-def evaluate(args, device, setting, test_loader, model, crit, logger, wandb, epoch, time_steps):
-    
-    test_loss = 0
-    predictions = torch.Tensor([]).to(device)
-    labels = torch.Tensor([]).to(device)
-    # with torch.no_grad():
-    for data_dict in test_loader:
-        X, y = data_dict["X"], data_dict["y"]
-        if args.drop is None:
-            objd_t, pred_t, time_steps = data_dict["tp"], data_dict["tp"], data_dict["tp"]
-            mask = None
-        elif args.mask is False:
-            objd_t, pred_t, time_steps = data_dict["objd_t"], data_dict["pred_t"], data_dict["tp"]
-            mask = None
-        else:
-            objd_t, pred_t, time_steps, mask = data_dict["objd_t"], data_dict["pred_t"], data_dict["tp"], data_dict["mask"]
-
-        
-        output = model(X, time_steps, objd_t, pred_t)
-        output = output.squeeze()
-        predictions = torch.cat((predictions, output))
-        labels = torch.cat((labels, y))
-        test_loss +=crit(output, y).item()
-
-    test_loss = test_loss / len(test_loader)
-    # calculate metrics
-    wandb.log({setting+" loss":test_loss})
-    logger.info('{} Epoch: {:04d} | {} Loss {:.6f}'.format(setting, epoch, setting, test_loss))
-    results = metrics.print_metrics_binary_classification(labels.data.cpu().numpy(),
-                predictions.data.cpu().numpy(), setting, verbose=1, logger=logger, wandb=wandb)
-    logger.info('\n')
-        
-    return results[setting+' AUROC']
-
 
 # https://github.com/Bjarten/early-stopping-pytorch/blob/master/MNIST_Early_Stopping_example.ipynb
-import numpy as np
-import torch
-
 class EarlyStopping:
     """Early stops the training if validation loss doesn't improve after a given patience."""
     def __init__(self, patience=7, verbose=False, delta=0, path='checkpoint.pt', trace_func=print, logger=None):

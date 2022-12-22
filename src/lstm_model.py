@@ -1,6 +1,11 @@
+# import numpy as np
 import torch
 import torch.nn as nn
+# from torch.nn.functional import relu
+# from torch.nn.modules.rnn import RNNCell
 from einops import rearrange, repeat
+
+from src.ode_cell import ODECell
 
 torch.autograd.set_detect_anomaly(True)
 
@@ -19,7 +24,7 @@ class LSTM_MODEL(nn.Module):
             bi = 2
         else:
             bi = 1
-
+        
         self.net = nn.LSTM(input_dim, latent_dim, batch_first=True, dropout=dropout, num_layers=num_layers, bidirectional=bidirectional)
         
         self.linear = nn.Linear(in_features=latent_dim*bi, out_features=n_labels)
@@ -32,7 +37,6 @@ class LSTM_MODEL(nn.Module):
         h = h[:,-1,:]
         
         h = self.linear(h)
-        
         h = self.act(h)
         
         return h

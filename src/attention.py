@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import torch
 import torch.nn as nn
 
@@ -20,6 +23,10 @@ class MultiheadAttention(nn.Module):
         self.to_out = nn.Linear(inner_dim, latent_dim)
 
     def forward(self, latent, data, mask=None):
+        # x (batch, num_latents=1, latents),  context(batch, features, channels=1)
+        # d_dim = latent.shape[-1]
+        # print('x:', x.shape)
+
         Q = self.w_q(latent) # (batch, num_latents, inner_dim)
         K = self.w_k(data) # (batch, features, inner_dim)
         V = self.w_v(data) # (batch, features, inner_dim)
