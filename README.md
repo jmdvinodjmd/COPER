@@ -1,7 +1,7 @@
 # Continuous Patient State Attention Models
 
 Code for the papers:
-> [Vinod Kumar Chauhan, Anshul Thakur, Odhran O'Donoghue, Omid Rohanian and David A. Clifton (2023) Continuous Patient State Attention Models, (under review)](https://www.medrxiv.org/content/10.1101/2022.12.23.22283908v1)
+> [Vinod Kumar Chauhan, Anshul Thakur, Odhran O'Donoghue, Omid Rohanian and David A. Clifton (2023) Continuous Patient State Attention Models, medRxiv, DOI:10.1101/2022.12.23.22283908 (under review)](https://www.medrxiv.org/content/10.1101/2022.12.23.22283908v1)
 
 > [Vinod Kumar Chauhan, Anshul Thakur, Odhran O'Donoghue and David A. Clifton (2022) COPER: Continuous Patient State Perceiver, IEEE International Conference on Biomedical and Health Informatics (BHI-2022)](https://arxiv.org/abs/2208.03196)
 
