@@ -1,7 +1,7 @@
 # Continuous Patient State Attention Models
 
 Code for the papers:
-> [Vinod Kumar Chauhan, Anshul Thakur, Odhran O'Donoghue, Omid Rohanian and David A. Clifton (2023) Continuous Patient State Attention Models, (under review)](https://arxiv.org/abs/2208.03196)
+> [Vinod Kumar Chauhan, Anshul Thakur, Odhran O'Donoghue, Omid Rohanian and David A. Clifton (2023) Continuous Patient State Attention Models, (under review)](https://www.medrxiv.org/content/10.1101/2022.12.23.22283908v1)
 
 > [Vinod Kumar Chauhan, Anshul Thakur, Odhran O'Donoghue and David A. Clifton (2022) COPER: Continuous Patient State Perceiver, IEEE International Conference on Biomedical and Health Informatics (BHI-2022)](https://arxiv.org/abs/2208.03196)
 
@@ -21,13 +21,17 @@ To run different experiments, you can use the following shell scripts:
 
 ## Citations:
 ```
-@inproceedings{chauhan2022coper,
-  title={Continuous Patient State Attention Models},
-  author={Chauhan, Vinod Kumar and Thakur, Anshul and O'Donoghue, Odhran and Rohanian, Omid and Clifton, David A},
-  year={2023},
+@article {Chauhan2022b,
+	author = {Chauhan, Vinod K. and Thakur, Anshul and O{\textquoteright}Donoghue, Odhran and Rohanian, Omid and Clifton, David A.},
+	title = {Continuous Patient State Attention Models},
+	year = {2022},
+	doi = {10.1101/2022.12.23.22283908},
+	publisher = {Cold Spring Harbor Laboratory Press},
+	URL = {https://www.medrxiv.org/content/early/2022/12/26/2022.12.23.22283908},
+	journal = {medRxiv}
 }
 
-@inproceedings{chauhan2022coper,
+@inproceedings{Chauhan2022a,
   title={COPER: Continuous Patient State Perceiver},
   author={Chauhan, Vinod Kumar and Thakur, Anshul and O'Donoghue, Odhran and Clifton, David A},
   booktitle={IEEE International Conference on Biomedical and Health Informatics},
